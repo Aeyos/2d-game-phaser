@@ -3007,9 +3007,10 @@ pbkdf2@^3.0.3:
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
 
-phaser@^3.10.1:
-  version "3.10.1"
-  resolved "https://registry.yarnpkg.com/phaser/-/phaser-3.10.1.tgz#a34099bba3f16476def83b34e8cc55fcd52083f0"
+phaser@3.15.0:
+  version "3.15.0"
+  resolved "https://registry.yarnpkg.com/phaser/-/phaser-3.15.0.tgz#d4417b64e1f6120ad0460f2a9d3fb1731f520303"
+  integrity sha512-PUG6A8czOc+xZ2Tc3+6xXmDje6vxKmsPZwcMVx4MjO8w7no3IIwS8FccKjQUhU+CuwADJ1bq7JF6miHEX5IROg==
   dependencies:
     eventemitter3 "^3.1.0"
 
