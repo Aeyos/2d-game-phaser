@@ -27,6 +27,13 @@ class ControlledPlayer extends Player {
       this.body.setVelocityY(0);
     }
   }
+
+  getPacket() {
+    return {
+      x: this.body.position.x,
+      y: this.body.position.y,
+    };
+  }
 }
 
 export default ControlledPlayer;
