@@ -3,9 +3,11 @@ import io from 'socket.io-client';
 
 import constants from './config/constants';
 import GameScene from './scenes/game';
+import state from './state';
 
 const socket = io(':3000');
 const form = document.querySelector('#loginForm');
+state.$socket = socket;
 
 form.addEventListener('submit', (evt) => {
   evt.preventDefault();
@@ -14,6 +16,7 @@ form.addEventListener('submit', (evt) => {
 
   socket.emit('login', name, pass, (response) => {
     if (response.data) {
+      state.uid = response.data.uid;
       form.style.display = 'none';
 
       const config = {
@@ -30,22 +33,8 @@ form.addEventListener('submit', (evt) => {
         },
       };
 
-      window.$socket = socket;
       const game = new Phaser.Game(config);
-      window.$game = game;
-
-      socket.on('broadcast', (msg) => {
-        console.log('broadcast', msg);
-      });
-
-      socket.on('message', (msg) => {
-        console.log('message', msg);
-      });
-
-      socket.on('update', function update(data) {
-        console.log('game', data)
-        game.scene.scenes[0].updateFromServer(data);
-      });
+      state.$game = game;
     }
   });
 });

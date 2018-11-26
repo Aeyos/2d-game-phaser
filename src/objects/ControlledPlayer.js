@@ -30,8 +30,10 @@ class ControlledPlayer extends Player {
 
   getPacket() {
     return {
-      x: this.body.position.x,
-      y: this.body.position.y,
+      move: { x: this.body.position.x, y: this.body.position.y },
+      // attack: { entityID, equipID },
+      // grab: { entityID },
+      // use: { entityID, equipID },
     };
   }
 }
