@@ -10,16 +10,16 @@ class ControlledPlayer extends Player {
   update(time, delta) {
     this.body.setVelocity(0);
     if (this.scene.cursors.down.isDown) {
-      this.anims.play('down', true);
+      this.anims.play(`${this.sprite}-down`, true);
       this.body.setVelocityY(200);
     } else if (this.scene.cursors.left.isDown) {
-      this.anims.play('left', true);
+      this.anims.play(`${this.sprite}-left`, true);
       this.body.setVelocityX(-200);
     } else if (this.scene.cursors.right.isDown) {
-      this.anims.play('right', true);
+      this.anims.play(`${this.sprite}-right`, true);
       this.body.setVelocityX(200);
     } else if (this.scene.cursors.up.isDown) {
-      this.anims.play('up', true);
+      this.anims.play(`${this.sprite}-up`, true);
       this.body.setVelocityY(-200);
     } else {
       this.anims.stop();

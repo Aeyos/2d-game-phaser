@@ -16,7 +16,7 @@ form.addEventListener('submit', (evt) => {
 
   socket.emit('login', name, pass, (response) => {
     if (response.data) {
-      state.uid = response.data.uid;
+      state.$playerEntity = response.data;
       form.style.display = 'none';
 
       const config = {

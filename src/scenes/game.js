@@ -6,8 +6,8 @@ import char001 from '../assets/char-001.png';
 import char002 from '../assets/char-002.png';
 import char003 from '../assets/char-003.png';
 import char004 from '../assets/char-004.png';
-import undead0 from '../assets/undead_0.png';
-import undead1 from '../assets/monster_dragon.png';
+import monster001 from '../assets/monster-001.png';
+import monster002 from '../assets/monster-002.png';
 
 import Player from '../objects/Player';
 import ControlledPlayer from '../objects/ControlledPlayer';
@@ -27,15 +27,16 @@ class Game extends Phaser.Scene {
     this.load.spritesheet('char-002', char002, { frameWidth: 32, frameHeight: 48 });
     this.load.spritesheet('char-003', char003, { frameWidth: 32, frameHeight: 48 });
     this.load.spritesheet('char-004', char004, { frameWidth: 32, frameHeight: 48 });
-    this.load.spritesheet('undead0', undead0, { frameWidth: 32, frameHeight: 48 });
-    this.load.spritesheet('undead1', undead1, { frameWidth: 96, frameHeight: 96 });
+    this.load.spritesheet('monster-001', monster001, { frameWidth: 32, frameHeight: 48 });
+    this.load.spritesheet('monster-002', monster002, { frameWidth: 40, frameHeight: 56 });
   }
 
   create() {
+    const mainPlayerUID = state.$playerEntity.uid;
     state.$players = {
-      [state.uid]: new ControlledPlayer(this, { x: 768, y: 768, uid: state.uid }),
+      [mainPlayerUID]: new ControlledPlayer(this, state.$playerEntity),
     };
-    state.$mainPlayer = state.$players[state.uid];
+    state.$mainPlayer = state.$players[mainPlayerUID];
 
     state.$socket.on('broadcast', (msg) => {
       console.log('broadcast', msg);
@@ -85,12 +86,12 @@ class Game extends Phaser.Scene {
     playerLayer.renderDebug(graphics, {
       tileColor: null, // Color of non-colliding tiles
       collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
-      faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
+      faceColor: new Phaser.Display.Color(40, 39, 37, 255), // Color of colliding face edges
     });
     collision.renderDebug(graphics, {
       tileColor: null, // Color of non-colliding tiles
       collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
-      faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
+      faceColor: new Phaser.Display.Color(40, 39, 37, 255), // Color of colliding face edges
     });
     // this.player.scaleX = this.player.scaleY;
   }
@@ -107,7 +108,6 @@ class Game extends Phaser.Scene {
 
   talkToServer() {
     state.$socket.emit('update', state.$mainPlayer.getPacket(), (entities) => {
-      console.log('entities', entities);
       this.createEntities(entities);
       this.updateEntities(entities);
       this.deleteEntities(entities);
@@ -134,35 +134,35 @@ class Game extends Phaser.Scene {
   }
 
   spawnPlayer(e) {
-    state.$players[e.uid] = new Player(this, { ...e.position, ...e.info });
+    state.$players[e.uid] = new Player(this, e);
   }
 
   buildAnimations() {
-    const sprites = ['char-001', 'char-002', 'char-003', 'char-004'];
+    const sprites = ['char-001', 'char-002', 'char-003', 'char-004', 'monster-001', 'monster-002'];
     sprites.forEach((s) => {
       this.anims.create({
-        key: 'down',
+        key: `${s}-down`,
         frames: this.anims.generateFrameNumbers(s, { start: 0, end: 3 }),
         frameRate: 10,
         repeat: -1,
       });
 
       this.anims.create({
-        key: 'left',
+        key: `${s}-left`,
         frames: this.anims.generateFrameNumbers(s, { start: 4, end: 7 }),
         frameRate: 10,
         repeat: -1,
       });
 
       this.anims.create({
-        key: 'right',
+        key: `${s}-right`,
         frames: this.anims.generateFrameNumbers(s, { start: 8, end: 11 }),
         frameRate: 10,
         repeat: -1,
       });
 
       this.anims.create({
-        key: 'up',
+        key: `${s}-up`,
         frames: this.anims.generateFrameNumbers(s, { start: 12, end: 15 }),
         frameRate: 10,
         repeat: -1,
