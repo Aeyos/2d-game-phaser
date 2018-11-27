@@ -12,6 +12,7 @@ import monster002 from '../assets/monster-002.png';
 import Player from '../objects/Player';
 import ControlledPlayer from '../objects/ControlledPlayer';
 import state from '../state';
+import DEPTH from '../config/depth';
 
 class Game extends Phaser.Scene {
   constructor() {
@@ -33,6 +34,7 @@ class Game extends Phaser.Scene {
 
   create() {
     const mainPlayerUID = state.$playerEntity.uid;
+    this.buildAnimation(state.$playerEntity);
     state.$players = {
       [mainPlayerUID]: new ControlledPlayer(this, state.$playerEntity),
     };
@@ -64,13 +66,13 @@ class Game extends Phaser.Scene {
     collision.setCollisionByProperty({ collides: true });
 
 
-    above.setDepth(20);
+    above.setDepth(DEPTH.ABOVE);
 
     this.physics.add.collider(state.$mainPlayer, playerLayer);
     this.physics.add.collider(state.$mainPlayer, collision);
 
     // Create player animation
-    this.buildAnimations();
+    // this.buildAnimations();
 
     this.cameras.main.zoom = 3;
 
@@ -134,41 +136,78 @@ class Game extends Phaser.Scene {
   }
 
   spawnPlayer(e) {
+    console.log('[Spawn]', e);
+    this.buildAnimation(e);
     state.$players[e.uid] = new Player(this, e);
   }
 
-  buildAnimations() {
-    const sprites = ['char-001', 'char-002', 'char-003', 'char-004', 'monster-001', 'monster-002'];
-    sprites.forEach((s) => {
-      this.anims.create({
-        key: `${s}-down`,
-        frames: this.anims.generateFrameNumbers(s, { start: 0, end: 3 }),
-        frameRate: 10,
-        repeat: -1,
-      });
+  buildAnimation(entity) {
+    console.log('entity', entity)
+    const key = entity.type === 'player' ? entity.uid : entity.sprite;
+    console.log('key', key)
+    if (this.anims.get(`${key}-down`)) return;
 
-      this.anims.create({
-        key: `${s}-left`,
-        frames: this.anims.generateFrameNumbers(s, { start: 4, end: 7 }),
-        frameRate: 10,
-        repeat: -1,
-      });
+    this.anims.create({
+      key: `${key}-down`,
+      frames: this.anims.generateFrameNumbers(entity.sprite, { start: 0, end: 3 }),
+      frameRate: entity.info.speed / 10,
+      repeat: -1,
+    });
 
-      this.anims.create({
-        key: `${s}-right`,
-        frames: this.anims.generateFrameNumbers(s, { start: 8, end: 11 }),
-        frameRate: 10,
-        repeat: -1,
-      });
+    this.anims.create({
+      key: `${key}-left`,
+      frames: this.anims.generateFrameNumbers(entity.sprite, { start: 4, end: 7 }),
+      frameRate: entity.info.speed / 10,
+      repeat: -1,
+    });
 
-      this.anims.create({
-        key: `${s}-up`,
-        frames: this.anims.generateFrameNumbers(s, { start: 12, end: 15 }),
-        frameRate: 10,
-        repeat: -1,
-      });
-    })
+    this.anims.create({
+      key: `${key}-right`,
+      frames: this.anims.generateFrameNumbers(entity.sprite, { start: 8, end: 11 }),
+      frameRate: entity.info.speed / 10,
+      repeat: -1,
+    });
+
+    this.anims.create({
+      key: `${key}-up`,
+      frames: this.anims.generateFrameNumbers(entity.sprite, { start: 12, end: 15 }),
+      frameRate: entity.info.speed / 10,
+      repeat: -1,
+    });
   }
+
+  // buildAnimations() {
+  //   const sprites = ['char-001', 'char-002', 'char-003', 'char-004', 'monster-001', 'monster-002'];
+  //   sprites.forEach((s) => {
+  //     this.anims.create({
+  //       key: `${s}-down`,
+  //       frames: this.anims.generateFrameNumbers(s, { start: 0, end: 3 }),
+  //       frameRate: 6,
+  //       repeat: -1,
+  //     });
+
+  //     this.anims.create({
+  //       key: `${s}-left`,
+  //       frames: this.anims.generateFrameNumbers(s, { start: 4, end: 7 }),
+  //       frameRate: 6,
+  //       repeat: -1,
+  //     });
+
+  //     this.anims.create({
+  //       key: `${s}-right`,
+  //       frames: this.anims.generateFrameNumbers(s, { start: 8, end: 11 }),
+  //       frameRate: 6,
+  //       repeat: -1,
+  //     });
+
+  //     this.anims.create({
+  //       key: `${s}-up`,
+  //       frames: this.anims.generateFrameNumbers(s, { start: 12, end: 15 }),
+  //       frameRate: 6,
+  //       repeat: -1,
+  //     });
+  //   })
+  // }
 
 }
 

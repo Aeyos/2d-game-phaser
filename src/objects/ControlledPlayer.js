@@ -4,28 +4,35 @@ class ControlledPlayer extends Player {
   constructor(game, args = {}) {
     super(game, args);
 
+    this.game = game;
+
     game.cameras.main.startFollow(this);
   }
 
   update(time, delta) {
+    this.playerUpdate();
     this.body.setVelocity(0);
+
     if (this.scene.cursors.down.isDown) {
-      this.anims.play(`${this.sprite}-down`, true);
-      this.body.setVelocityY(200);
+      this.playAnim('down');
+      this.body.setVelocityY(this.speed);
     } else if (this.scene.cursors.left.isDown) {
-      this.anims.play(`${this.sprite}-left`, true);
-      this.body.setVelocityX(-200);
+      this.playAnim('left');
+      this.body.setVelocityX(-this.speed);
     } else if (this.scene.cursors.right.isDown) {
-      this.anims.play(`${this.sprite}-right`, true);
-      this.body.setVelocityX(200);
+      this.playAnim('right');
+      this.body.setVelocityX(this.speed);
     } else if (this.scene.cursors.up.isDown) {
-      this.anims.play(`${this.sprite}-up`, true);
-      this.body.setVelocityY(-200);
+      this.playAnim('up');
+      this.body.setVelocityY(-this.speed);
     } else {
       this.anims.stop();
       this.body.setVelocityX(0);
       this.body.setVelocityY(0);
     }
+
+    this.game.cameras.main.x = 1 - (this.body.position.x % 1);
+    this.game.cameras.main.y = 1 - (this.body.position.y % 1);
   }
 
   getPacket() {
