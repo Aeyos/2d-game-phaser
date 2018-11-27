@@ -2,8 +2,8 @@ import Phaser from 'phaser';
 import io from 'socket.io-client';
 
 import constants from './config/constants';
-import GameScene from './scenes/game';
-import state from './state';
+import GameScene from './scenes/Game';
+import state from './State';
 
 const socket = io(':3000');
 const form = document.querySelector('#loginForm');
@@ -25,12 +25,12 @@ form.addEventListener('submit', (evt) => {
         height: constants.HEIGHT,
         pixelArt: true,
         scene: [GameScene],
-        physics: {
-          default: 'arcade',
-          arcade: {
-            gravity: { y: 0 },
-          },
-        },
+        // physics: {
+        //   default: 'arcade',
+        //   arcade: {
+        //     gravity: { y: 0 },
+        //   },
+        // },
       };
 
       const game = new Phaser.Game(config);

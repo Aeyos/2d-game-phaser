@@ -1,24 +1,23 @@
+// PACKAGES
 import Phaser from 'phaser';
-
-import overworldTileset from '../assets/mainTileset.png';
-import mapJson from '../assets/map.json';
+// LOCALS
+import ControlledPlayer from '../objects/ControlledPlayer';
+import DEPTH from '../config/depth';
+import Player from '../objects/Player';
+import State from '../State';
+// ASSETS
 import char001 from '../assets/char-001.png';
 import char002 from '../assets/char-002.png';
 import char003 from '../assets/char-003.png';
 import char004 from '../assets/char-004.png';
 import monster001 from '../assets/monster-001.png';
 import monster002 from '../assets/monster-002.png';
-
-import Player from '../objects/Player';
-import ControlledPlayer from '../objects/ControlledPlayer';
-import state from '../state';
-import DEPTH from '../config/depth';
+import mapJson from '../assets/map.json';
+import overworldTileset from '../assets/mainTileset.png';
 
 class Game extends Phaser.Scene {
   constructor() {
     super({ key: 'Game' });
-
-    // setInterval(() => this.sendUpdateToServer(), 50);
   }
 
   preload() {
@@ -33,69 +32,71 @@ class Game extends Phaser.Scene {
   }
 
   create() {
-    const mainPlayerUID = state.$playerEntity.uid;
-    this.buildAnimation(state.$playerEntity);
-    state.$players = {
-      [mainPlayerUID]: new ControlledPlayer(this, state.$playerEntity),
-    };
-    state.$mainPlayer = state.$players[mainPlayerUID];
-
-    state.$socket.on('broadcast', (msg) => {
+    // SOCKET EVENT BINDING
+    State.$socket.on('broadcast', (msg) => {
       console.log('broadcast', msg);
     });
 
-    state.$socket.on('message', (msg) => {
+    State.$socket.on('message', (msg) => {
       console.log('message', msg);
     });
 
-    state.$socket.on('update', (data) => {
+    State.$socket.on('update', (data) => {
       this.updateFromServer(data);
     });
 
+    // CREATE MAIN PLAYER
+    const mainPlayerUID = State.$playerEntity.uid;
+    State.$players = {
+      [mainPlayerUID]: new ControlledPlayer(this, State.$playerEntity),
+    };
+    State.$mainPlayer = State.$players[mainPlayerUID];
+    this.buildAnimation(State.$playerEntity);
+
+    // BUILD MAP
     const map = this.make.tilemap({ key: 'map' });
     const tileset = map.addTilesetImage('mainTileset', 'tiles');
 
-    const terrain = map.createStaticLayer('Terrain', tileset, 0, 0);
-    const terrainDecoration = map.createStaticLayer('TerrainDecoration', tileset, 0, 0);
-    const terrainDetails = map.createStaticLayer('TerrainDetails', tileset, 0, 0);
-    const playerLayer = map.createStaticLayer('PlayerLayer', tileset, 0, 0);
-    const above = map.createStaticLayer('Above', tileset, 0, 0);
-    const collision = map.createStaticLayer('Collision', tileset, 0, 0);
+    this.layers = {
+      terrain: map.createStaticLayer('Terrain', tileset, 0, 0),
+      terrainDecoration: map.createStaticLayer('TerrainDecoration', tileset, 0, 0),
+      terrainDetails: map.createStaticLayer('TerrainDetails', tileset, 0, 0),
+      playerLayer: map.createStaticLayer('PlayerLayer', tileset, 0, 0),
+      above: map.createStaticLayer('Above', tileset, 0, 0),
+    };
 
-    playerLayer.setCollisionByProperty({ collides: true });
-    collision.setCollisionByProperty({ collides: true });
+    console.log('map', map)
+    console.log('tileset', tileset)
+    console.log('this.layers', this.layers)
 
+    // PHYSICS
+    // playerLayer.setCollisionByProperty({ collides: true });
+    // collision.setCollisionByProperty({ collides: true });
+    // this.physics.add.collider(State.$mainPlayer, playerLayer);
+    // this.physics.add.collider(State.$mainPlayer, collision);
+    // this.physics.world.createDebugGraphic();
 
-    above.setDepth(DEPTH.ABOVE);
+    // DEPTH SORTING
+    this.layers.above.setDepth(DEPTH.ABOVE);
 
-    this.physics.add.collider(state.$mainPlayer, playerLayer);
-    this.physics.add.collider(state.$mainPlayer, collision);
-
-    // Create player animation
-    // this.buildAnimations();
-
+    // CAMERA SETUP
     this.cameras.main.zoom = 3;
 
-    // Turn on physics debugging to show player's hitbox
-    this.physics.world.createDebugGraphic();
-
-    // Create worldLayer collision graphic above the player, but below the help text
-    const graphics = this.add
-      .graphics()
-      .setAlpha(0.75)
-      .setDepth(20);
-
-    playerLayer.renderDebug(graphics, {
-      tileColor: null, // Color of non-colliding tiles
-      collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
-      faceColor: new Phaser.Display.Color(40, 39, 37, 255), // Color of colliding face edges
-    });
-    collision.renderDebug(graphics, {
-      tileColor: null, // Color of non-colliding tiles
-      collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
-      faceColor: new Phaser.Display.Color(40, 39, 37, 255), // Color of colliding face edges
-    });
-    // this.player.scaleX = this.player.scaleY;
+    // DEBUG
+    // const graphics = this.add
+    //   .graphics()
+    //   .setAlpha(0.75)
+    //   .setDepth(20);
+    // playerLayer.renderDebug(graphics, {
+    //   tileColor: null, // Color of non-colliding tiles
+    //   collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
+    //   faceColor: new Phaser.Display.Color(40, 39, 37, 255), // Color of colliding face edges
+    // });
+    // collision.renderDebug(graphics, {
+    //   tileColor: null, // Color of non-colliding tiles
+    //   collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
+    //   faceColor: new Phaser.Display.Color(40, 39, 37, 255), // Color of colliding face edges
+    // });
   }
 
   update(time, deltaMsec) {
@@ -103,13 +104,15 @@ class Game extends Phaser.Scene {
     // Create movement controller
     this.cursors = this.input.keyboard.createCursorKeys();
 
-    state.$mainPlayer.update(time, delta);
+    Object.values(State.$players).forEach((p) => {
+      p.update(time, delta);
+    });
 
     this.talkToServer();
   }
 
   talkToServer() {
-    state.$socket.emit('update', state.$mainPlayer.getPacket(), (entities) => {
+    State.$socket.emit('update', State.$mainPlayer.getPacket(), (entities) => {
       this.createEntities(entities);
       this.updateEntities(entities);
       this.deleteEntities(entities);
@@ -119,7 +122,7 @@ class Game extends Phaser.Scene {
   createEntities(entities) {
     // @todo: add case for other entities
     entities.forEach((e) => {
-      if (!state.$players[e.uid] && e.uid) {
+      if (!State.$players[e.uid] && e.uid) {
         this.spawnPlayer(e);
       }
     });
@@ -127,7 +130,7 @@ class Game extends Phaser.Scene {
 
   updateEntities(entities) {
     entities.forEach(e => {
-      state.$players[e.uid].update(e);
+      State.$players[e.uid].serverUpdate(e);
     });
   }
 
@@ -138,40 +141,38 @@ class Game extends Phaser.Scene {
   spawnPlayer(e) {
     console.log('[Spawn]', e);
     this.buildAnimation(e);
-    state.$players[e.uid] = new Player(this, e);
+    State.$players[e.uid] = new Player(this, e);
   }
 
   buildAnimation(entity) {
-    console.log('entity', entity)
     const key = entity.type === 'player' ? entity.uid : entity.sprite;
-    console.log('key', key)
     if (this.anims.get(`${key}-down`)) return;
 
     this.anims.create({
       key: `${key}-down`,
       frames: this.anims.generateFrameNumbers(entity.sprite, { start: 0, end: 3 }),
-      frameRate: entity.info.speed / 10,
+      frameRate: entity.info.speed * 2,
       repeat: -1,
     });
 
     this.anims.create({
       key: `${key}-left`,
       frames: this.anims.generateFrameNumbers(entity.sprite, { start: 4, end: 7 }),
-      frameRate: entity.info.speed / 10,
+      frameRate: entity.info.speed * 2,
       repeat: -1,
     });
 
     this.anims.create({
       key: `${key}-right`,
       frames: this.anims.generateFrameNumbers(entity.sprite, { start: 8, end: 11 }),
-      frameRate: entity.info.speed / 10,
+      frameRate: entity.info.speed * 2,
       repeat: -1,
     });
 
     this.anims.create({
       key: `${key}-up`,
       frames: this.anims.generateFrameNumbers(entity.sprite, { start: 12, end: 15 }),
-      frameRate: entity.info.speed / 10,
+      frameRate: entity.info.speed * 2,
       repeat: -1,
     });
   }

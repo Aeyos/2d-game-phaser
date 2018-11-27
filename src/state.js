@@ -1,3 +1,7 @@
 export default {
-  socket: null,
+  $socket: null,
+  $playerEntity: null,
+  $game: null,
+  $players: null,
+  $monsters: null,
 };
