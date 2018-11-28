@@ -25,12 +25,6 @@ form.addEventListener('submit', (evt) => {
         height: constants.HEIGHT,
         pixelArt: true,
         scene: [GameScene],
-        // physics: {
-        //   default: 'arcade',
-        //   arcade: {
-        //     gravity: { y: 0 },
-        //   },
-        // },
       };
 
       const game = new Phaser.Game(config);

@@ -1,32 +1,16 @@
-export default class Movement {
-  static moveTowards(obj, point, delta) {
-    const diffX = point.x - obj.x;
-    const diffY = point.y - obj.y;
-    let displaceX = 0;
-    let displaceY = 0;
-    let direction = 'none';
+class Movement {
+  static moveTowards(obj, movement, delta) {
+    if (new Date().getTime() > (movement.moveStart + movement.duration)) return 'none';
 
-    if (Math.abs(diffX) > 2) {
-      displaceX = delta * obj.speed * (diffX > 0 ? 32 : -32);
-      if (displaceX > 0) direction = 'right';
-      if (displaceX < 0) direction = 'left';
-    } else {
-      displaceX = diffX;
-    }
+    const deltaTime = new Date().getTime() - movement.moveStart;
+    const percent = deltaTime / movement.duration;
+    const x = Math.round(movement.from.x + ((movement.position.x - movement.from.x) * percent));
+    const y = Math.round(movement.from.y + ((movement.position.y - movement.from.y) * percent));
 
-    if (Math.abs(diffY) > 2) {
-      displaceY = delta * obj.speed * (diffY > 0 ? 32 : -32);
-      if (displaceY > 0) direction = 'down';
-      if (displaceY < 0) direction = 'up';
-    } else {
-      displaceY = diffY;
-    }
+    Object.assign(obj, { x, y });
 
-    Object.assign(obj, {
-      x: obj.x + displaceX,
-      y: obj.y + displaceY,
-    });
-
-    return direction;
+    return 'none';
   }
 }
+
+export default Movement;

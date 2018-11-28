@@ -2,9 +2,10 @@
 import Phaser from 'phaser';
 // LOCALS
 import ControlledPlayer from '../objects/ControlledPlayer';
-import DEPTH from '../config/depth';
 import Player from '../objects/Player';
 import State from '../State';
+import DEPTH from '../config/depth';
+import ENTITY from '../types/Entity';
 // ASSETS
 import char001 from '../assets/char-001.png';
 import char002 from '../assets/char-002.png';
@@ -47,10 +48,10 @@ class Game extends Phaser.Scene {
 
     // CREATE MAIN PLAYER
     const mainPlayerUID = State.$playerEntity.uid;
-    State.$players = {
+    State.$entities = {
       [mainPlayerUID]: new ControlledPlayer(this, State.$playerEntity),
     };
-    State.$mainPlayer = State.$players[mainPlayerUID];
+    State.$mainPlayer = State.$entities[mainPlayerUID];
     this.buildAnimation(State.$playerEntity);
 
     // BUILD MAP
@@ -65,38 +66,11 @@ class Game extends Phaser.Scene {
       above: map.createStaticLayer('Above', tileset, 0, 0),
     };
 
-    console.log('map', map)
-    console.log('tileset', tileset)
-    console.log('this.layers', this.layers)
-
-    // PHYSICS
-    // playerLayer.setCollisionByProperty({ collides: true });
-    // collision.setCollisionByProperty({ collides: true });
-    // this.physics.add.collider(State.$mainPlayer, playerLayer);
-    // this.physics.add.collider(State.$mainPlayer, collision);
-    // this.physics.world.createDebugGraphic();
-
     // DEPTH SORTING
     this.layers.above.setDepth(DEPTH.ABOVE);
 
     // CAMERA SETUP
     this.cameras.main.zoom = 3;
-
-    // DEBUG
-    // const graphics = this.add
-    //   .graphics()
-    //   .setAlpha(0.75)
-    //   .setDepth(20);
-    // playerLayer.renderDebug(graphics, {
-    //   tileColor: null, // Color of non-colliding tiles
-    //   collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
-    //   faceColor: new Phaser.Display.Color(40, 39, 37, 255), // Color of colliding face edges
-    // });
-    // collision.renderDebug(graphics, {
-    //   tileColor: null, // Color of non-colliding tiles
-    //   collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
-    //   faceColor: new Phaser.Display.Color(40, 39, 37, 255), // Color of colliding face edges
-    // });
   }
 
   update(time, deltaMsec) {
@@ -104,7 +78,7 @@ class Game extends Phaser.Scene {
     // Create movement controller
     this.cursors = this.input.keyboard.createCursorKeys();
 
-    Object.values(State.$players).forEach((p) => {
+    Object.values(State.$entities).forEach((p) => {
       p.update(time, delta);
     });
 
@@ -122,7 +96,7 @@ class Game extends Phaser.Scene {
   createEntities(entities) {
     // @todo: add case for other entities
     entities.forEach((e) => {
-      if (!State.$players[e.uid] && e.uid) {
+      if (!State.$entities[e.uid] && e.uid) {
         this.spawnPlayer(e);
       }
     });
@@ -130,7 +104,7 @@ class Game extends Phaser.Scene {
 
   updateEntities(entities) {
     entities.forEach(e => {
-      State.$players[e.uid].serverUpdate(e);
+      State.$entities[e.uid].serverUpdate(e);
     });
   }
 
@@ -141,75 +115,41 @@ class Game extends Phaser.Scene {
   spawnPlayer(e) {
     console.log('[Spawn]', e);
     this.buildAnimation(e);
-    State.$players[e.uid] = new Player(this, e);
+    State.$entities[e.uid] = new Player(this, e);
   }
 
   buildAnimation(entity) {
-    const key = entity.type === 'player' ? entity.uid : entity.sprite;
+    const key = entity.type === ENTITY.PLAYER ? entity.uid : entity.sprite;
     if (this.anims.get(`${key}-down`)) return;
 
     this.anims.create({
       key: `${key}-down`,
       frames: this.anims.generateFrameNumbers(entity.sprite, { start: 0, end: 3 }),
-      frameRate: entity.info.speed * 2,
+      frameRate: entity.speed * 2,
       repeat: -1,
     });
 
     this.anims.create({
       key: `${key}-left`,
       frames: this.anims.generateFrameNumbers(entity.sprite, { start: 4, end: 7 }),
-      frameRate: entity.info.speed * 2,
+      frameRate: entity.speed * 2,
       repeat: -1,
     });
 
     this.anims.create({
       key: `${key}-right`,
       frames: this.anims.generateFrameNumbers(entity.sprite, { start: 8, end: 11 }),
-      frameRate: entity.info.speed * 2,
+      frameRate: entity.speed * 2,
       repeat: -1,
     });
 
     this.anims.create({
       key: `${key}-up`,
       frames: this.anims.generateFrameNumbers(entity.sprite, { start: 12, end: 15 }),
-      frameRate: entity.info.speed * 2,
+      frameRate: entity.speed * 2,
       repeat: -1,
     });
   }
-
-  // buildAnimations() {
-  //   const sprites = ['char-001', 'char-002', 'char-003', 'char-004', 'monster-001', 'monster-002'];
-  //   sprites.forEach((s) => {
-  //     this.anims.create({
-  //       key: `${s}-down`,
-  //       frames: this.anims.generateFrameNumbers(s, { start: 0, end: 3 }),
-  //       frameRate: 6,
-  //       repeat: -1,
-  //     });
-
-  //     this.anims.create({
-  //       key: `${s}-left`,
-  //       frames: this.anims.generateFrameNumbers(s, { start: 4, end: 7 }),
-  //       frameRate: 6,
-  //       repeat: -1,
-  //     });
-
-  //     this.anims.create({
-  //       key: `${s}-right`,
-  //       frames: this.anims.generateFrameNumbers(s, { start: 8, end: 11 }),
-  //       frameRate: 6,
-  //       repeat: -1,
-  //     });
-
-  //     this.anims.create({
-  //       key: `${s}-up`,
-  //       frames: this.anims.generateFrameNumbers(s, { start: 12, end: 15 }),
-  //       frameRate: 6,
-  //       repeat: -1,
-  //     });
-  //   })
-  // }
-
 }
 
 export default Game;

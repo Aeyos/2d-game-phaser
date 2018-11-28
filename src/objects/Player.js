@@ -1,38 +1,38 @@
 import Phaser from 'phaser';
 
-import DEPTH from '../config/depth';
 import Movement from '../utils/Movement';
+import DEPTH from '../config/depth';
+import ENTITY from '../types/Entity';
 
 class Player extends Phaser.GameObjects.Sprite {
   constructor(game, args = {}) {
     // Create object
-    super(game, args.position.x || 0, args.position.y || 0, args.sprite || 'char');
+    super(game, args.movement.position.x || 0, args.movement.position.y || 0, args.sprite || 'char');
+
     // Add existing object to scene
     game.add.existing(this);
 
     // Add custom properties
     this.uid = args.uid;
     this.sprite = args.sprite;
-    this.level = args.info.level;
-    this.name = args.info.name;
-    this.serverPosition = args.position;
-    this.speed = args.info.speed;
+    this.level = args.level;
+    this.name = args.name;
+    this.serverMovement = args.movement;
+    this.speed = args.speed;
     this.type = args.type;
-    this.key = this.type === 'player' ? this.uid : this.sprite;
+    this.key = this.type === ENTITY.PLAYER ? this.uid : this.sprite;
 
     // Spawn child objects
     this.text = game.add.text(0, 0, `[${this.level}] ${this.name}`, { align: 'center', color: '#00ef00', fontSize: '8px', fontFamily: 'Tahoma', stroke: 'black', strokeThickness: 1, resolution: 3 });
     this.text.setDepth(DEPTH.TEXT);
 
+    // Set sprite origin
     this.setOrigin(0, 0.5);
-    // Set object properties
-    // this.setSize(32, 32);
-    // this.setOffset(0, 24);
   }
 
   playerUpdate(time, delta) {
     // Move towards position from server
-    const result = Movement.moveTowards(this, this.serverPosition, delta);
+    const result = Movement.moveTowards(this, this.serverMovement, delta);
 
     // Play animation going towards position
     this.playAnim(result);
@@ -54,7 +54,7 @@ class Player extends Phaser.GameObjects.Sprite {
   // Get update from server
   serverUpdate(entity) {
     // Grab server entity position
-    this.serverPosition = entity.position;
+    this.serverMovement = entity.movement;
   }
 
   update(...args) {
