@@ -52,7 +52,6 @@ class Game extends Phaser.Scene {
       [mainPlayerUID]: new ControlledPlayer(this, State.$playerEntity),
     };
     State.$mainPlayer = State.$entities[mainPlayerUID];
-    this.buildAnimation(State.$playerEntity);
 
     // BUILD MAP
     const map = this.make.tilemap({ key: 'map' });
@@ -114,41 +113,7 @@ class Game extends Phaser.Scene {
 
   spawnPlayer(e) {
     console.log('[Spawn]', e);
-    this.buildAnimation(e);
     State.$entities[e.uid] = new Player(this, e);
-  }
-
-  buildAnimation(entity) {
-    const key = entity.type === ENTITY.PLAYER ? entity.uid : entity.sprite;
-    if (this.anims.get(`${key}-down`)) return;
-
-    this.anims.create({
-      key: `${key}-down`,
-      frames: this.anims.generateFrameNumbers(entity.sprite, { start: 0, end: 3 }),
-      frameRate: entity.speed * 2,
-      repeat: -1,
-    });
-
-    this.anims.create({
-      key: `${key}-left`,
-      frames: this.anims.generateFrameNumbers(entity.sprite, { start: 4, end: 7 }),
-      frameRate: entity.speed * 2,
-      repeat: -1,
-    });
-
-    this.anims.create({
-      key: `${key}-right`,
-      frames: this.anims.generateFrameNumbers(entity.sprite, { start: 8, end: 11 }),
-      frameRate: entity.speed * 2,
-      repeat: -1,
-    });
-
-    this.anims.create({
-      key: `${key}-up`,
-      frames: this.anims.generateFrameNumbers(entity.sprite, { start: 12, end: 15 }),
-      frameRate: entity.speed * 2,
-      repeat: -1,
-    });
   }
 }
 
