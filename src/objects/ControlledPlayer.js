@@ -20,7 +20,7 @@ class ControlledPlayer extends Player {
   }
 
   update(time, delta) {
-    this.playerUpdate(time, delta);
+    super.update(time, delta);
 
     this.speedCooldown -= delta;
     if (this.speedCooldown <= 0) {
@@ -36,6 +36,15 @@ class ControlledPlayer extends Player {
     }
     // this.game.cameras.main.x = 1 - (this.x % 1);
     // this.game.cameras.main.y = 1 - (this.y % 1);
+  }
+
+  // Get update from server
+  serverUpdate(entity) {
+    if (entity.actions.moved === 0) {
+      this.to = { x: this.x, y: this.y };
+      this.speedCooldown = 0;
+    }
+    super.serverUpdate(entity);
   }
 
   getPacket() {

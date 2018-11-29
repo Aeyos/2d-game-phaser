@@ -70,6 +70,7 @@ class Game extends Phaser.Scene {
 
     // CAMERA SETUP
     this.cameras.main.zoom = 3;
+    this.cameras.main.setBounds(0, 0, map.width * 32, map.height * 32);
   }
 
   update(time, deltaMsec) {

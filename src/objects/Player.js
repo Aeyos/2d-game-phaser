@@ -76,7 +76,7 @@ class Player extends Phaser.GameObjects.Sprite {
     });
   }
 
-  playerUpdate(time, delta) {
+  update(time, delta) {
     // Move towards position from server
     const result = Movement.moveTowards(this, this.serverMovement, delta);
 
@@ -108,11 +108,6 @@ class Player extends Phaser.GameObjects.Sprite {
   serverUpdate(entity) {
     // Grab server entity position
     this.serverMovement = entity.movement;
-  }
-
-  update(...args) {
-    // Update generic player
-    this.playerUpdate(...args);
   }
 }
 
