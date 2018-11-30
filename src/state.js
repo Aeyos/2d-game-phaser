@@ -1,6 +1,7 @@
 export default {
-  $socket: null,
-  $playerEntity: null,
-  $game: null,
   $entities: null,
+  $game: null,
+  $mouseTracker: null,
+  $playerEntity: null,
+  $socket: null,
 };

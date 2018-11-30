@@ -2,6 +2,7 @@
 import Phaser from 'phaser';
 // LOCALS
 import ControlledPlayer from '../objects/ControlledPlayer';
+import MousePointer from '../objects/MousePointer';
 import Player from '../objects/Player';
 import State from '../State';
 import DEPTH from '../config/depth';
@@ -52,6 +53,7 @@ class Game extends Phaser.Scene {
       [mainPlayerUID]: new ControlledPlayer(this, State.$playerEntity),
     };
     State.$mainPlayer = State.$entities[mainPlayerUID];
+    State.$mouseTracker = new MousePointer(this);
 
     // BUILD MAP
     const map = this.make.tilemap({ key: 'map' });
@@ -81,6 +83,7 @@ class Game extends Phaser.Scene {
     Object.values(State.$entities).forEach((p) => {
       p.update(time, delta);
     });
+    State.$mouseTracker.update();
 
     this.talkToServer();
   }
