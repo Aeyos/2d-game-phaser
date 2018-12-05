@@ -7,32 +7,22 @@ import Entity from '../objects/Entity';
 import State from '../State';
 import DEPTH from '../config/depth';
 
-// ASSETS
-import char001 from '../assets/char-001.png';
-import char002 from '../assets/char-002.png';
-import char003 from '../assets/char-003.png';
-import char004 from '../assets/char-004.png';
-import monster001 from '../assets/monster-001.png';
-import monster002 from '../assets/monster-002.png';
-import monsterDragon from '../assets/monster_dragon.png';
-import mapJson from '../assets/map.json';
-import overworldTileset from '../assets/mainTileset.png';
-
 class Game extends Phaser.Scene {
   constructor() {
     super({ key: 'Game' });
   }
 
   preload() {
-    this.load.image('tiles', overworldTileset);
-    this.load.tilemapTiledJSON('map', mapJson);
-    this.load.spritesheet('char-001', char001, { frameWidth: 32, frameHeight: 48 });
-    this.load.spritesheet('char-002', char002, { frameWidth: 32, frameHeight: 48 });
-    this.load.spritesheet('char-003', char003, { frameWidth: 32, frameHeight: 48 });
-    this.load.spritesheet('char-004', char004, { frameWidth: 32, frameHeight: 48 });
-    this.load.spritesheet('monster-001', monster001, { frameWidth: 32, frameHeight: 48 });
-    this.load.spritesheet('monster-002', monster002, { frameWidth: 40, frameHeight: 56 });
-    this.load.spritesheet('monster_dragon', monsterDragon, { frameWidth: 96, frameHeight: 96 });
+    this.load.baseURL = 'http://localhost/public/';
+    this.load.image('tiles', 'mainTileset.png');
+    this.load.tilemapTiledJSON('map', 'map.json');
+    this.load.spritesheet('char-001', 'char-001.png', { frameWidth: 32, frameHeight: 48 });
+    this.load.spritesheet('char-002', 'char-002.png', { frameWidth: 32, frameHeight: 48 });
+    this.load.spritesheet('char-003', 'char-003.png', { frameWidth: 32, frameHeight: 48 });
+    this.load.spritesheet('char-004', 'char-004.png', { frameWidth: 32, frameHeight: 48 });
+    this.load.spritesheet('monster-001', 'monster-001.png', { frameWidth: 32, frameHeight: 48 });
+    this.load.spritesheet('monster-002', 'monster-002.png', { frameWidth: 40, frameHeight: 56 });
+    this.load.spritesheet('monster_dragon', 'monster_dragon.png', { frameWidth: 96, frameHeight: 96 });
   }
 
   create() {
