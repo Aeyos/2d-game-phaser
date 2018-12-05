@@ -1,10 +1,9 @@
 import Phaser from 'phaser';
-
 import Movement from '../utils/Movement';
 import DEPTH from '../config/depth';
 import ENTITY from '../types/Entity';
 
-class Player extends Phaser.GameObjects.Sprite {
+export default class Entity extends Phaser.GameObjects.Sprite {
   constructor(game, args = {}) {
     // Create object
     super(game, args.movement.position.x || 0, args.movement.position.y || 0, args.sprite || 'char');
@@ -13,13 +12,12 @@ class Player extends Phaser.GameObjects.Sprite {
     game.add.existing(this);
 
     // Add custom properties
-    this.level = args.level;
-    this.name = args.name;
-    this.serverMovement = args.movement;
-    this.speed = args.speed;
-    this.sprite = args.sprite;
-    this.type = args.type;
-    this.uid = args.uid;
+    const { movement, ...data } = args;
+
+    Object.assign(this, data);
+
+    this.serverMovement = movement;
+    this.maxHp = args.hp;
     this.animationKey = this.type === ENTITY.PLAYER ? this.uid : this.sprite;
     this.meta = {
       moveTimer: 0,
@@ -29,23 +27,26 @@ class Player extends Phaser.GameObjects.Sprite {
     this.buildAnimation();
 
     // Spawn child objects
-    this.text = game.add.text(0, 0, `[${this.level}] ${this.name}`, {
+    this.text = game.add.text(0, 0, `[${this.level}] ${this.name}\n♥ ${this.hp}`, { // \n⚔ ${this.atk} - ⛨ ${this.def}
       align: 'center',
       color: '#00ef00',
       fontSize: '8px',
       fontFamily: 'Tahoma',
-      stroke: 'black',
-      strokeThickness: 1,
+      stroke: '#004500',
+      strokeThickness: 2,
       resolution: 3,
     });
+    this.text.setOrigin(0.5, 1);
     this.text.setDepth(DEPTH.TEXT);
 
     // Set sprite origin
-    this.setOrigin(0, 0.5);
+    this.setOrigin(((this.width - 32) / 2) / this.width, 1 - (24 / this.height));
   }
 
   buildAnimation() {
-    if (this.anims.animationManager.get(`${this.animationKey}-down`)) return;
+    if (this.anims.animationManager.get(`${this.animationKey}-down`)) {
+      return;
+    }
 
     this.anims.animationManager.create({
       key: `${this.animationKey}-down`,
@@ -84,8 +85,8 @@ class Player extends Phaser.GameObjects.Sprite {
     this.playAnim(result, delta);
 
     // Reposition text
-    this.text.x = (this.x + (this.width / 2)) - Math.round(this.text.width / 2);
-    this.text.y = this.y - (this.height - 12);
+    this.text.x = this.x + 16;
+    this.text.y = this.y - (this.height - 24);
 
     // Reorder player depth
     this.setDepth(DEPTH.BASE + (this.y / 32));
@@ -101,6 +102,7 @@ class Player extends Phaser.GameObjects.Sprite {
       this.meta.moveTimer = 0;
       this.anims.play(`${this.animationKey}-${direction}`, true);
     }
+
     this.meta.moveTimer += delta;
   }
 
@@ -110,5 +112,3 @@ class Player extends Phaser.GameObjects.Sprite {
     this.serverMovement = entity.movement;
   }
 }
-
-export default Player;

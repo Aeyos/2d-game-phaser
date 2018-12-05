@@ -1,4 +1,4 @@
-import Player from './Player';
+import Player from "./Entity";
 
 class ControlledPlayer extends Player {
   constructor(game, args = {}) {
@@ -34,8 +34,6 @@ class ControlledPlayer extends Player {
         this.displace(0, -32);
       }
     }
-    // this.game.cameras.main.x = 1 - (this.x % 1);
-    // this.game.cameras.main.y = 1 - (this.y % 1);
   }
 
   // Get update from server

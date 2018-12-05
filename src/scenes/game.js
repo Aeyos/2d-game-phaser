@@ -3,10 +3,10 @@ import Phaser from 'phaser';
 // LOCALS
 import ControlledPlayer from '../objects/ControlledPlayer';
 import MousePointer from '../objects/MousePointer';
-import Player from '../objects/Player';
+import Entity from '../objects/Entity';
 import State from '../State';
 import DEPTH from '../config/depth';
-import ENTITY from '../types/Entity';
+
 // ASSETS
 import char001 from '../assets/char-001.png';
 import char002 from '../assets/char-002.png';
@@ -14,6 +14,7 @@ import char003 from '../assets/char-003.png';
 import char004 from '../assets/char-004.png';
 import monster001 from '../assets/monster-001.png';
 import monster002 from '../assets/monster-002.png';
+import monsterDragon from '../assets/monster_dragon.png';
 import mapJson from '../assets/map.json';
 import overworldTileset from '../assets/mainTileset.png';
 
@@ -31,9 +32,15 @@ class Game extends Phaser.Scene {
     this.load.spritesheet('char-004', char004, { frameWidth: 32, frameHeight: 48 });
     this.load.spritesheet('monster-001', monster001, { frameWidth: 32, frameHeight: 48 });
     this.load.spritesheet('monster-002', monster002, { frameWidth: 40, frameHeight: 56 });
+    this.load.spritesheet('monster_dragon', monsterDragon, { frameWidth: 96, frameHeight: 96 });
   }
 
   create() {
+    // STATE
+    State.$camera = this.cameras.main;
+    State.$mouse = this.input.mousePointer;
+    State.$scene = this;
+
     // SOCKET EVENT BINDING
     State.$socket.on('broadcast', (msg) => {
       console.log('broadcast', msg);
@@ -48,12 +55,13 @@ class Game extends Phaser.Scene {
     });
 
     // CREATE MAIN PLAYER
+    console.log('State.$playerEntity', State.$playerEntity)
     const mainPlayerUID = State.$playerEntity.uid;
     State.$entities = {
       [mainPlayerUID]: new ControlledPlayer(this, State.$playerEntity),
     };
     State.$mainPlayer = State.$entities[mainPlayerUID];
-    State.$mouseTracker = new MousePointer(this);
+    State.$mouseTracker = new MousePointer();
 
     // BUILD MAP
     const map = this.make.tilemap({ key: 'map' });
@@ -83,6 +91,7 @@ class Game extends Phaser.Scene {
     Object.values(State.$entities).forEach((p) => {
       p.update(time, delta);
     });
+
     State.$mouseTracker.update();
 
     this.talkToServer();
@@ -117,7 +126,7 @@ class Game extends Phaser.Scene {
 
   spawnPlayer(e) {
     console.log('[Spawn]', e);
-    State.$entities[e.uid] = new Player(this, e);
+    State.$entities[e.uid] = new Entity(this, e);
   }
 }
 
