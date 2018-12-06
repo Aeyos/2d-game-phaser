@@ -5,7 +5,7 @@ import DEPTH from '../config/depth';
 
 class MousePointer {
   constructor() {
-    this.rect = new Phaser.Geom.Rectangle(-32, -32, 32, 32);
+    this.rect = new Phaser.Geom.Rectangle(-32, -32, 34, 34);
     this.graphics = State.$scene.add.graphics({ lineStyle: { color: 0xFFFFFF } });
 
     this.graphics.setDepth(DEPTH.ACTION_CURSOR);
@@ -21,8 +21,8 @@ class MousePointer {
       (
         State.$mouse.y - (State.$camera.config.height / 2)
       ) / 3) + State.$camera.midPoint.y;
-    this.rect.x -= this.rect.x % 32;
-    this.rect.y -= this.rect.y % 32;
+    this.rect.x -= (this.rect.x % 32) + 1;
+    this.rect.y -= (this.rect.y % 32) + 1;
 
     this.graphics.strokeRectShape(this.rect);
   }

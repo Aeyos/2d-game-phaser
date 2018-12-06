@@ -1,4 +1,9 @@
-import Player from "./Entity";
+import Phaser from 'phaser';
+
+import Player from './Entity';
+import State from '../State';
+
+import DEPTH from '../config/depth';
 
 class ControlledPlayer extends Player {
   constructor(game, args = {}) {
@@ -7,9 +12,16 @@ class ControlledPlayer extends Player {
     this.game = game;
     this.to = { x: args.movement.position.x, y: args.movement.position.y };
     this.speedCooldown = 0;
+    this.attackCooldown = 0;
     this.actions = { moved: false };
+    this.mainPlayer = true;
 
     game.cameras.main.startFollow(this);
+
+    // TARGET INDICATOR
+    this.rect = new Phaser.Geom.Rectangle(-32, -32, 32, 32);
+    this.graphics = State.$scene.add.graphics({ lineStyle: { color: 0xFF0000 } });
+    this.graphics.setDepth(DEPTH.ACTION_CURSOR);
   }
 
   displace(x, y) {
@@ -34,6 +46,26 @@ class ControlledPlayer extends Player {
         this.displace(0, -32);
       }
     }
+
+    this.attackCooldown -= delta;
+    if (this.attackCooldown <= 0) {
+      if (this.target) {
+        this.attackCooldown = 1 / this.atk_speed;
+        this.actions.attacked = true;
+      }
+    }
+
+    this.updateTarget();
+  }
+
+  updateTarget() {
+    this.graphics.clear();
+
+    if (!this.target) return;
+
+    this.rect.x = this.target.x;
+    this.rect.y = this.target.y;
+    this.graphics.strokeRectShape(this.rect);
   }
 
   // Get update from server
@@ -42,6 +74,14 @@ class ControlledPlayer extends Player {
       this.to = { x: this.x, y: this.y };
       this.speedCooldown = 0;
     }
+
+    if (entity.actions.attacked === 0) {
+      this.attackCooldown = 0;
+    } else {
+      // play attack animation with damage
+      console.log('attack successful')
+    }
+
     super.serverUpdate(entity);
   }
 
@@ -53,7 +93,16 @@ class ControlledPlayer extends Player {
       this.actions.moved = false;
     }
 
+    if (this.actions.attacked && this.target) {
+      packet.attack = { entityUID: this.target.uid };
+      this.actions.attacked = false;
+    }
+
     return packet;
+  }
+
+  setTarget(entity) {
+    this.target = entity;
   }
 }
 

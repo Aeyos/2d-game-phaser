@@ -1,5 +1,8 @@
 import Phaser from 'phaser';
+
 import Movement from '../utils/Movement';
+import State from '../State';
+
 import DEPTH from '../config/depth';
 import ENTITY from '../types/Entity';
 
@@ -27,7 +30,7 @@ export default class Entity extends Phaser.GameObjects.Sprite {
     this.buildAnimation();
 
     // Spawn child objects
-    this.text = game.add.text(0, 0, `[${this.level}] ${this.name}\n♥ ${this.hp}`, { // \n⚔ ${this.atk} - ⛨ ${this.def}
+    this.text = game.add.text(0, 0, '', { // \n⚔ ${this.atk} - ⛨ ${this.def}
       align: 'center',
       color: '#00ef00',
       fontSize: '8px',
@@ -41,7 +44,19 @@ export default class Entity extends Phaser.GameObjects.Sprite {
 
     // Set sprite origin
     this.setOrigin(((this.width - 32) / 2) / this.width, 1 - (24 / this.height));
+
+    this.setInteractive()
+      .on('pointerdown', this.onClick);
   }
+
+  // EVENT HANDLERS
+  onClick() {
+    if (!this.mainPlayer) {
+      State.$mainPlayer.setTarget(this);
+    }
+  }
+
+  // OTHER METHODS
 
   buildAnimation() {
     if (this.anims.animationManager.get(`${this.animationKey}-down`)) {
@@ -77,21 +92,6 @@ export default class Entity extends Phaser.GameObjects.Sprite {
     });
   }
 
-  update(time, delta) {
-    // Move towards position from server
-    const result = Movement.moveTowards(this, this.serverMovement, delta);
-
-    // Play animation going towards position
-    this.playAnim(result, delta);
-
-    // Reposition text
-    this.text.x = this.x + 16;
-    this.text.y = this.y - (this.height - 24);
-
-    // Reorder player depth
-    this.setDepth(DEPTH.BASE + (this.y / 32));
-  }
-
   playAnim(direction, delta) {
     // Play animation by name
     if (direction === 'none') {
@@ -106,9 +106,31 @@ export default class Entity extends Phaser.GameObjects.Sprite {
     this.meta.moveTimer += delta;
   }
 
+  update(time, delta) {
+    // Move towards position from server
+    const result = Movement.moveTowards(this, this.serverMovement, delta);
+
+    // Play animation going towards position
+    this.playAnim(result, delta);
+
+    // Reposition text
+    this.updateText();
+
+    // Reorder player depth
+    this.setDepth(DEPTH.BASE + (this.y / 32));
+  }
+
+  updateText() {
+    this.text.setText(`[${this.level}] ${this.name}\n♥ ${this.hp}`);
+    this.text.x = this.x + 16;
+    this.text.y = this.y - (this.height - 24);
+
+  }
+
   // Get update from server
   serverUpdate(entity) {
     // Grab server entity position
     this.serverMovement = entity.movement;
+    this.hp = entity.hp;
   }
 }
