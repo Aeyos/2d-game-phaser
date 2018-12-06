@@ -77,9 +77,9 @@ class ControlledPlayer extends Player {
 
     if (entity.actions.attacked === 0) {
       this.attackCooldown = 0;
-    } else {
+    } else if (entity.actions.attack === 1) {
       // play attack animation with damage
-      console.log('attack successful')
+      console.log('attack successful');
     }
 
     super.serverUpdate(entity);
