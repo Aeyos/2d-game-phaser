@@ -91,7 +91,6 @@ class Game extends Phaser.Scene {
     State.$socket.emit('update', State.$mainPlayer.getPacket(), (response) => {
       this.createEntities(response.entities);
       this.updateEntities(response);
-      this.deleteEntities(response.entities);
     });
   }
 
@@ -104,20 +103,23 @@ class Game extends Phaser.Scene {
     });
   }
 
-  updateEntities(response) {
-    response.journal.forEach(e => {
+  updateEntities(response) { // eslint-disable-line class-methods-use-this
+    response.journal.forEach((e) => {
       State.$entities[e.target.uid].results.push(e);
     });
 
     State.$mainPlayer.results.push(...response.result);
 
-    response.entities.forEach(e => {
-      State.$entities[e.uid].serverUpdate(e);
-    });
-  }
+    const entityMap = response.entities.reduce((a, v) => ({ ...a, [v.uid]: v }), {});
 
-  deleteEntities(entities) {
-    // PLACEHOLDER
+    Object.entries(State.$entities).forEach((pair) => {
+      const entity = entityMap[pair[0]];
+      if (entity) {
+        pair[1].serverUpdate(entity);
+      } else {
+        pair[1].kill();
+      }
+    });
   }
 
   spawnPlayer(e) {

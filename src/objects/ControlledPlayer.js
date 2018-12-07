@@ -86,6 +86,10 @@ class ControlledPlayer extends Player {
     this.graphics.clear();
 
     if (!this.target) return;
+    if (this.target.killed) {
+      this.target = null;
+      return;
+    }
 
     this.rect.x = this.target.x;
     this.rect.y = this.target.y;

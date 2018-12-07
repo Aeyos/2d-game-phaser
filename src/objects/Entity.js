@@ -1,11 +1,10 @@
 import Phaser from 'phaser';
-import { Actions as ACTIONS } from 'game-defs';
+import { Actions as ACTIONS, Entity as ENTITY } from 'game-defs';
 
 import Movement from '../utils/Movement';
 import State from '../State';
 
 import DEPTH from '../config/depth';
-import ENTITY from '../types/Entity';
 
 export default class Entity extends Phaser.GameObjects.Sprite {
   constructor(game, args = {}) {
@@ -47,8 +46,11 @@ export default class Entity extends Phaser.GameObjects.Sprite {
     // Set sprite origin
     this.setOrigin(((this.width - 32) / 2) / this.width, 1 - (24 / this.height));
 
-    this.setInteractive()
-      .on('pointerdown', this.onClick);
+    this.setInteractive().on('pointerdown', this.onClick);
+
+    this.damages = [];
+
+    this.game = game;
   }
 
   // EVENT HANDLERS
@@ -108,15 +110,39 @@ export default class Entity extends Phaser.GameObjects.Sprite {
     this.meta.moveTimer += delta;
   }
 
+  playDamage(damage) {
+    const obj = this.game.add.text(this.x, this.y, `♥ ${damage}`, {
+      align: 'center',
+      color: '#FF3333',
+      fontSize: '8px',
+      fontFamily: 'Tahoma',
+      stroke: '#450000',
+      strokeThickness: 2,
+      resolution: 3,
+    });
+
+    obj.setOrigin(0.5, 1);
+    obj.setDepth(DEPTH.DAMAGE);
+    obj.timeElapsed = 0;
+
+    this.damages.push(obj);
+  }
+
   update(time, delta) {
+    // Reposition text
+    this.updateText();
+
+    // Update damage indicators
+    this.updateDamage(delta);
+
+    // No need to update dead enemies
+    if (this.killed) return;
+
     // Move towards position from server
     const result = Movement.moveTowards(this, this.serverMovement, delta);
 
     // Play animation going towards position
     this.playAnim(result, delta);
-
-    // Reposition text
-    this.updateText();
 
     // Reorder player depth
     this.setDepth(DEPTH.BASE + (this.y / 32));
@@ -128,23 +154,51 @@ export default class Entity extends Phaser.GameObjects.Sprite {
     this.text.y = this.y - (this.height - 24);
   }
 
-  // Get update from server
-  serverUpdate(entity) {
-    this.results.forEach((a) => {
+  updateDamage(delta) {
+    this.damages.forEach((d) => {
+      if (d.timeElapsed > 1.5) {
+        this.damages.splice(this.damages.indexOf(d), 1);
+        d.destroy();
+      } else {
+        d.x = this.x + 16;
+        d.y = this.y - (this.height - 24) - Math.round(d.timeElapsed * 20);
+        d.timeElapsed = d.timeElapsed + delta;
+      }
+    });
+  }
+
+  kill() {
+    this.text.destroy();
+    this.killed = true;
+    this.setDepth(DEPTH.BODIES);
+    this.playAnim('none', 999999);
+    this.handleEvents(this.results);
+  }
+
+  handleEvents(events) {
+    events.forEach((a) => {
       switch (a.type) {
         case ACTIONS.DAMAGE:
-          console.log(`${this.name}(${a.target.name}) took ${a.damage} from ${a.source.name}`);
+          this.playDamage(a.damage);
+          break;
+        case ACTIONS.KILL:
+          this.angle = 90;
           break;
         default:
           break;
       }
     });
 
+    delete this.results;
+    this.results = [];
+  }
+
+  // Get update from server
+  serverUpdate(entity) {
+    this.handleEvents(this.results);
+
     // Grab server entity position
     this.serverMovement = entity.movement;
     this.hp = entity.hp;
-
-    delete this.results;
-    this.results = [];
   }
 }
