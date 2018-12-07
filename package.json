@@ -17,6 +17,7 @@
     "parcel-bundler": "^1.10.3"
   },
   "dependencies": {
+    "game-defs": "file:../game-definitions",
     "phaser": "3.15.1",
     "socket.io-client": "^2.1.1"
   }

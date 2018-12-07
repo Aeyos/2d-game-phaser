@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { Actions as ACTIONS } from 'game-defs';
 
 import Movement from '../utils/Movement';
 import State from '../State';
@@ -25,6 +26,7 @@ export default class Entity extends Phaser.GameObjects.Sprite {
     this.meta = {
       moveTimer: 0,
     };
+    this.results = [];
 
     // Build animations
     this.buildAnimation();
@@ -124,13 +126,25 @@ export default class Entity extends Phaser.GameObjects.Sprite {
     this.text.setText(`[${this.level}] ${this.name}\n♥ ${this.hp}`);
     this.text.x = this.x + 16;
     this.text.y = this.y - (this.height - 24);
-
   }
 
   // Get update from server
   serverUpdate(entity) {
+    this.results.forEach((a) => {
+      switch (a.type) {
+        case ACTIONS.DAMAGE:
+          console.log(`${this.name}(${a.target.name}) took ${a.damage} from ${a.source.name}`);
+          break;
+        default:
+          break;
+      }
+    });
+
     // Grab server entity position
     this.serverMovement = entity.movement;
     this.hp = entity.hp;
+
+    delete this.results;
+    this.results = [];
   }
 }

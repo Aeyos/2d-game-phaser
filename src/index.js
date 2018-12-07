@@ -9,6 +9,7 @@ const socket = io(':3000');
 const form = document.querySelector('#loginForm');
 state.$socket = socket;
 
+
 form.addEventListener('submit', (evt) => {
   evt.preventDefault();
   const name = evt.currentTarget.elements.name.value;

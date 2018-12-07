@@ -1,9 +1,11 @@
 import Phaser from 'phaser';
+import { Actions as ACTIONS } from 'game-defs';
 
 import Player from './Entity';
 import State from '../State';
 
 import DEPTH from '../config/depth';
+
 
 class ControlledPlayer extends Player {
   constructor(game, args = {}) {
@@ -13,7 +15,7 @@ class ControlledPlayer extends Player {
     this.to = { x: args.movement.position.x, y: args.movement.position.y };
     this.speedCooldown = 0;
     this.attackCooldown = 0;
-    this.actions = { moved: false };
+    this.actions = [];
     this.mainPlayer = true;
 
     game.cameras.main.startFollow(this);
@@ -24,17 +26,43 @@ class ControlledPlayer extends Player {
     this.graphics.setDepth(DEPTH.ACTION_CURSOR);
   }
 
+  // Create request to move player, but don't move yet
   displace(x, y) {
+    // Set new position
     this.to.x -= x;
     this.to.y += y;
+
+    // Set move cooldown
     this.speedCooldown = 1 / this.speed;
-    this.actions.moved = true;
+
+    // Append action to array
+    this.actions.push({
+      x: this.to.x,
+      y: this.to.y,
+      type: ACTIONS.MOVEMENT,
+      timestamp: new Date().getTime(),
+    });
+  }
+
+  attack() {
+    if (this.target) {
+      this.attackCooldown = 1 / this.atk_speed;
+
+      // Append action to array
+      this.actions.push({
+        target: this.target.uid,
+        type: ACTIONS.ATTACK,
+        timestamp: new Date().getTime(),
+      });
+    }
   }
 
   update(time, delta) {
     super.update(time, delta);
 
     this.speedCooldown -= delta;
+    this.attackCooldown -= delta;
+
     if (this.speedCooldown <= 0) {
       if (this.scene.cursors.down.isDown) {
         this.displace(0, 32);
@@ -47,12 +75,8 @@ class ControlledPlayer extends Player {
       }
     }
 
-    this.attackCooldown -= delta;
     if (this.attackCooldown <= 0) {
-      if (this.target) {
-        this.attackCooldown = 1 / this.atk_speed;
-        this.actions.attacked = true;
-      }
+      this.attack();
     }
 
     this.updateTarget();
@@ -70,35 +94,33 @@ class ControlledPlayer extends Player {
 
   // Get update from server
   serverUpdate(entity) {
-    if (entity.actions.moved === 0) {
-      this.to = { x: this.x, y: this.y };
-      this.speedCooldown = 0;
-    }
-
-    if (entity.actions.attacked === 0) {
-      this.attackCooldown = 0;
-    } else if (entity.actions.attack === 1) {
-      // play attack animation with damage
-      console.log('attack successful');
-    }
+    // this.to = entity.movement;
+    this.results.forEach((a) => {
+      switch (a.type) {
+        case ACTIONS.MOVEMENT:
+          if (!a.didPerform) {
+            this.to.x = entity.movement.position.x;
+            this.to.y = entity.movement.position.y;
+            this.speedCooldown = 0;
+          }
+          break;
+        case ACTIONS.ATTACK:
+          if (!a.didPerform) {
+            this.attackCooldown = 0;
+          }
+          break;
+        default:
+          break;
+      }
+    });
 
     super.serverUpdate(entity);
   }
 
   getPacket() {
-    const packet = {};
-
-    if (this.actions.moved) {
-      packet.move = { x: this.to.x, y: this.to.y };
-      this.actions.moved = false;
-    }
-
-    if (this.actions.attacked && this.target) {
-      packet.attack = { entityUID: this.target.uid };
-      this.actions.attacked = false;
-    }
-
-    return packet;
+    const returnArr = this.actions;
+    this.actions = [];
+    return returnArr;
   }
 
   setTarget(entity) {

@@ -45,7 +45,7 @@ class Game extends Phaser.Scene {
     });
 
     // CREATE MAIN PLAYER
-    console.log('State.$playerEntity', State.$playerEntity)
+    console.log('State.$playerEntity', State.$playerEntity);
     const mainPlayerUID = State.$playerEntity.uid;
     State.$entities = {
       [mainPlayerUID]: new ControlledPlayer(this, State.$playerEntity),
@@ -88,10 +88,10 @@ class Game extends Phaser.Scene {
   }
 
   talkToServer() {
-    State.$socket.emit('update', State.$mainPlayer.getPacket(), (entities) => {
-      this.createEntities(entities);
-      this.updateEntities(entities);
-      this.deleteEntities(entities);
+    State.$socket.emit('update', State.$mainPlayer.getPacket(), (response) => {
+      this.createEntities(response.entities);
+      this.updateEntities(response);
+      this.deleteEntities(response.entities);
     });
   }
 
@@ -104,8 +104,14 @@ class Game extends Phaser.Scene {
     });
   }
 
-  updateEntities(entities) {
-    entities.forEach(e => {
+  updateEntities(response) {
+    response.journal.forEach(e => {
+      State.$entities[e.target.uid].results.push(e);
+    });
+
+    State.$mainPlayer.results.push(...response.result);
+
+    response.entities.forEach(e => {
       State.$entities[e.uid].serverUpdate(e);
     });
   }
