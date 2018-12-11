@@ -22,7 +22,8 @@ class Game extends Phaser.Scene {
     this.load.spritesheet('char-004', 'char-004.png', { frameWidth: 32, frameHeight: 48 });
     this.load.spritesheet('monster-001', 'monster-001.png', { frameWidth: 32, frameHeight: 48 });
     this.load.spritesheet('monster-002', 'monster-002.png', { frameWidth: 40, frameHeight: 56 });
-    this.load.spritesheet('monster_dragon', 'monster_dragon.png', { frameWidth: 96, frameHeight: 96 });
+    this.load.spritesheet('monster_slime', 'monster_slime.png', { frameWidth: 48, frameHeight: 48 });
+    // this.load.spritesheet('monster_dragon', 'monster_dragon.png', { frameWidth: 96, frameHeight: 96 });
   }
 
   create() {

@@ -129,9 +129,6 @@ export default class Entity extends Phaser.GameObjects.Sprite {
   }
 
   update(time, delta) {
-    // Reposition text
-    this.updateText();
-
     // Update damage indicators
     this.updateDamage(delta);
 
@@ -143,6 +140,9 @@ export default class Entity extends Phaser.GameObjects.Sprite {
 
     // Play animation going towards position
     this.playAnim(result, delta);
+
+    // Reposition text
+    this.updateText();
 
     // Reorder player depth
     this.setDepth(DEPTH.BASE + (this.y / 32));
