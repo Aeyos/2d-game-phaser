@@ -16,14 +16,18 @@ class Game extends Phaser.Scene {
     this.load.baseURL = 'http://localhost/public/';
     this.load.image('tiles', 'mainTileset.png');
     this.load.tilemapTiledJSON('map', 'map.json');
-    this.load.spritesheet('char-001', 'char-001.png', { frameWidth: 32, frameHeight: 48 });
-    this.load.spritesheet('char-002', 'char-002.png', { frameWidth: 32, frameHeight: 48 });
-    this.load.spritesheet('char-003', 'char-003.png', { frameWidth: 32, frameHeight: 48 });
-    this.load.spritesheet('char-004', 'char-004.png', { frameWidth: 32, frameHeight: 48 });
-    this.load.spritesheet('monster-001', 'monster-001.png', { frameWidth: 32, frameHeight: 48 });
-    this.load.spritesheet('monster-002', 'monster-002.png', { frameWidth: 40, frameHeight: 56 });
-    this.load.spritesheet('monster_slime', 'monster_slime.png', { frameWidth: 48, frameHeight: 48 });
-    // this.load.spritesheet('monster_dragon', 'monster_dragon.png', { frameWidth: 96, frameHeight: 96 });
+
+    const assets = [
+      { name: 'char-001', options: { frameWidth: 32, frameHeight: 48 } },
+      { name: 'char-002', options: { frameWidth: 32, frameHeight: 48 } },
+      { name: 'char-003', options: { frameWidth: 32, frameHeight: 48 } },
+      { name: 'char-004', options: { frameWidth: 32, frameHeight: 48 } },
+      { name: 'monster-001', options: { frameWidth: 32, frameHeight: 48 } },
+      { name: 'monster-002', options: { frameWidth: 40, frameHeight: 56 } },
+      { name: 'monster_slime', options: { frameWidth: 48, frameHeight: 48 } },
+    ];
+
+    assets.forEach(a => this.load.spritesheet(a.name, `${a.name}.png`, a.options));
   }
 
   create() {
